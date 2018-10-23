@@ -1,7 +1,10 @@
 package edu.wpi.cs3733.util.updatechecker;
 
+import com.google.gson.Gson;
+
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -16,30 +19,22 @@ public class UpdateChecker {
 	 * Default API base url. Can override if desired.
 	 */
 	protected static String apiURL = "https://ravana.dyn.wpi.edu";
-	protected static URL url = null;
 
 	/**
 	 * Cached response from latest query to API server
 	 */
-	protected static Object lastResult = null;
+	protected static API lastResult = null;
 
 	/**
 	 * Check if a connection to the server can be established. Good for preventing requests that don't need to happen.
 	 * @return True if server is up, false otherwise
 	 */
 	public static boolean checkConnection() {
-		if (url == null){
-			try{
-				url = new URL(apiURL);
-			} catch (MalformedURLException e){
-				return false;
-			}
-		}
-
 		try{
 			//Create a connection object and use it to connect to the server. If no IOException is generated we can
 			//assume the connection works, so just disconnect and return true. If ANY exception is generated, return
 			//false.
+			URL url = new URL(apiURL);
 			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 			connection.connect();
 			connection.disconnect();
@@ -57,7 +52,7 @@ public class UpdateChecker {
 	 *                   gradle string.
 	 * @param groupId Group ID, also found on the API site webpage (the 'group' field). Looks like
 	 *                edu.wpi.cs3733.[]#.team[]
-	 * @return True if up-to-date, false otherwise
+	 * @return True if up-to-date, false otherwise. Returns true as a fallback if the server can't be contacted.
 	 */
 	public static boolean isLatestVerison(String version, String artifactId, String groupId) {
 		return true;
@@ -110,6 +105,16 @@ public class UpdateChecker {
 	 * @return API object containing all available metadata on requested API
 	 */
 	public static API fetchAPIInfo(String artifactId, String groupId) {
+		if (lastResult != null) {
+			return lastResult;
+		}
+		try {
+			URL url = new URL(apiURL + "/api/list?artifactID=" + artifactId + "&groupID=" + groupId);
+			lastResult = fetchByURL(url);
+			return lastResult;
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -121,7 +126,34 @@ public class UpdateChecker {
 	 * @return API object containing all available metadata on requested API
 	 */
 	public static API fetchAPIInfo(String uuid) {
+		if (lastResult != null)
+			return lastResult;
+		try{
+			URL url = new URL(apiURL + "/api/list?id=" + uuid);
+			lastResult = fetchByURL(url);
+			return lastResult;
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		return null;
+	}
+
+	/**
+	 * Fetch API from the server using an already-created URL object.
+	 * @param url HTTPS URL.
+	 * @return API object if found, null if otherwise or if error.
+	 */
+	protected static API fetchByURL(URL url) {
+		API api;
+		try {
+			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+			Gson gson = new Gson();
+			api = gson.fromJson(new InputStreamReader(connection.getInputStream()), API.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return api;
 	}
 
 	/**
@@ -136,10 +168,8 @@ public class UpdateChecker {
 	 * Set API base URL
 	 * @param apiURL API url as a string. This should be the BASE URL, i.e. https://ravana.dyn.wpi.edu, NOT INCLUDING
 	 *               ANY TRAILING CHARACTERS. That means you shouldn't put /api here!
-	 * @throws MalformedURLException Thrown in case of bad URL.
 	 */
-	public static void setApiURL(String apiURL) throws MalformedURLException {
-		url = new URL(apiURL);
+	public static void setApiURL(String apiURL) {
 		UpdateChecker.apiURL = apiURL;
 	}
 
@@ -166,9 +196,9 @@ public class UpdateChecker {
 	}
 
 	/**
-	 * Clear the cached API object. Don't actually do this, it's for testing purposes!
+	 * Clear the cached API object. You should never have to call this unless you're somehow getting bad cached data.
 	 */
-	static void clearCache() {
+	public static void clearCache() {
 		UpdateChecker.lastResult = null;
 	}
 }
