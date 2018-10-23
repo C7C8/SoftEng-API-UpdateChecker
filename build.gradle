@@ -14,19 +14,13 @@ dependencies {
 		[group: 'com.google.code.gson', name: 'gson', version: '2.8.5']
 	)
 	testCompile(
-		[group: 'junit', name: 'junit', version: '4.12'],
+		[group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'],
+		[group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.3.1'],
 		[group: 'com.google.code.gson', name: 'gson', version: '2.8.5']
 	)
 }
 
-jar {
-	manifest {
-		attributes 'Main-Class': 'edu.wpi.cs3733.util.updatechecker.UpdateChecker'
-	}
-	from configurations.runtime.collect { zipTree(it) }
-}
-
-task run(type: JavaExec) {
-	main = 'edu.wpi.cs3733.util.updatechecker.UpdateChecker'
-	classpath = sourceSets.main.runtimeClasspath
+test {
+	useJUnitPlatform()
+	dependsOn 'cleanTest'
 }

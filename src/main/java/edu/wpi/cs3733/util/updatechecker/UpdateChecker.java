@@ -13,8 +13,12 @@ public class UpdateChecker {
 	 */
 	protected static Object lastResult = null;
 
-	public static void main(String[] args) {
-
+	/**
+	 * Check if a connection to the server can be established. Good for preventing requests that don't need to happen.
+	 * @return True if server is up, false otherwise
+	 */
+	public static boolean checkConnection() {
+		return false;
 	}
 
 	/**
@@ -44,7 +48,7 @@ public class UpdateChecker {
 	/**
 	 * Get a list of version changes from the changelog since the specified version. E.g. if you provide version 1.0.0
 	 * and there's been a version 1.0.1 and version 1.1.0 since, you'll get the changelog for just those two releases.
-	 * @param version API version in #.#.# format (e.g. 17.0.1)
+	 * @param version API version in #.#.# format (e.g. 17.0.1). If null, full version history will be returned.
 	 * @param artifactId API artifact ID, you can find this on the API site webpage -- it's just the 'name' field in the
 	 *                   gradle string.
 	 * @param groupId Group ID, also found on the API site webpage (the 'group' field). Looks like
@@ -58,7 +62,7 @@ public class UpdateChecker {
 	/**
 	 * Get a list of version changes from the changelog since the specified version. E.g. if you provide version 1.0.0
 	 * and there's been a version 1.0.1 and version 1.1.0 since, you'll get the changelog for just those two releases.
-	 * @param version API version in #.#.# format (e.g. 17.0.1)
+	 * @param version API version in #.#.# format (e.g. 17.0.1). If null, full version history will be returned.
 	 * @param uuid API UUID. To find your API's UUID, go to the API server /list.json
 	 *                (default: https://ravana.dyn.wpi/list.json) and check your API entry's "id" field.
 	 * @return Sorted array of version history entries as strings, most recent change last.
@@ -106,5 +110,12 @@ public class UpdateChecker {
 	 */
 	public static void setApiURL(String apiURL){
 		UpdateChecker.apiURL = apiURL;
+	}
+
+	/**
+	 * Clear the cached API object. Don't actually do this!
+	 */
+	static void clearCache() {
+		UpdateChecker.lastResult = null;
 	}
 }
