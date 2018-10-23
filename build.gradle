@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+version = '1.0'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	testCompile(
+		[group: 'junit', name: 'junit', version: '4.12'],
+	)
+}
+
+jar {
+	manifest {
+		attributes 'Main-Class': 'edu.wpi.cs3733.util.updatechecker.UpdateChecker'
+	}
+	from configurations.runtime.collect { zipTree(it) }
+}
+
+task run(type: JavaExec) {
+	main = 'edu.wpi.cs3733.util.updatechecker.UpdateChecker'
+	classpath = sourceSets.main.runtimeClasspath
+}
