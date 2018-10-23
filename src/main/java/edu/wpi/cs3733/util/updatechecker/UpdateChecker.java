@@ -184,23 +184,6 @@ public class UpdateChecker {
 	}
 
 	/**
-	 * Get the API base URL in usage.
-	 * @return API url as a string.
-	 */
-	public static String getApiURL(){
-		return apiURL;
-	}
-
-	/**
-	 * Set API base URL
-	 * @param apiURL API url as a string. This should be the BASE URL, i.e. https://ravana.dyn.wpi.edu, NOT INCLUDING
-	 *               ANY TRAILING CHARACTERS. That means you shouldn't put /api here!
-	 */
-	public static void setApiURL(String apiURL) {
-		UpdateChecker.apiURL = apiURL;
-	}
-
-	/**
 	 * Utility function for comparing version number strings.
 	 * @param orig First version string
 	 * @param next Next version string
