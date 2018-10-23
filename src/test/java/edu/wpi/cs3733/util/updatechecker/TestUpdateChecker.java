@@ -1,5 +1,6 @@
 package edu.wpi.cs3733.util.updatechecker;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,6 +11,12 @@ class TestUpdateChecker {
 	private static final String testGroupId = "edu.wpi.cs3733.d18.teamD";
 	private static final String testArtifactId = "GiftRequest";
 	private static final String testVersion = "1.1.0";
+
+	@BeforeAll
+	static void connection() {
+		if (!UpdateChecker.checkConnection())
+			fail();
+	}
 
 	@Test
 	void compareVersions() {
@@ -89,5 +96,17 @@ class TestUpdateChecker {
 		res = UpdateChecker.fetchAPIInfo(testId);
 		assertNotNull(res);
 		assertEquals(testId, res.id);
+	}
+
+	@Test
+	void historySince() {
+		//Ensure the filtered results have at least one entry
+		String[] history = UpdateChecker.getChangesSince("1.0.0", testId);
+		assertNotNull(history);
+		assertTrue(history.length > 0, "History filtering failure");
+
+		history = UpdateChecker.getChangesSince(testVersion, testId);
+		assertNotNull(history);
+		assertEquals(0, history.length, "Returned history that shouldn't exist; has the API updated?");
 	}
 }

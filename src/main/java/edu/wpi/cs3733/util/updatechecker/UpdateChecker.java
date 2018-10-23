@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
 public class UpdateChecker {
-
 
 	/**
 	 * Default API base url. Can override if desired.
@@ -88,7 +88,10 @@ public class UpdateChecker {
 	 * @return Sorted array of version history entries as strings, most recent change last.
 	 */
 	public static String[] getChangesSince(String version, String artifactId, String groupId) {
-		return null;
+		API api = fetchAPIInfo(artifactId, groupId);
+		if (api == null)
+			return null;
+		return filterHistory(version, api.history);
 	}
 
 	/**
@@ -100,7 +103,23 @@ public class UpdateChecker {
 	 * @return Sorted array of version history entries as strings, most recent change last.
 	 */
 	public static String[] getChangesSince(String version, String uuid) {
-		return null;
+		API api = fetchAPIInfo(uuid);
+		if (api == null)
+			return null;
+		return filterHistory(version, api.history);
+	}
+
+	protected static String[] filterHistory(String version, String[] history) {
+		ArrayList<String> temp = new ArrayList<>();
+		for (String item : history) {
+			//No need for validation here, the server automatically inserts a colon and a version number into each entry
+			String curVersion = item.split(":")[0];
+			if (compareVersion(curVersion, version) == 1)
+				temp.add(item);
+		}
+
+		String[] ret = {};
+		return temp.toArray(ret);
 	}
 
 	/**
