@@ -49,4 +49,9 @@ class TestUpdateChecker {
 		assertNotNull(res, "Failed to retrieve API by artifact+group ID");
 		assertEquals(testVersion, res.version, "Retrieved API but requested version number is incorrect");
 	}
+
+	@Test
+	void caching() {
+		fail();
+	}
 }

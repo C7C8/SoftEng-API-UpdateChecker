@@ -105,7 +105,7 @@ public class UpdateChecker {
 	 * @return API object containing all available metadata on requested API
 	 */
 	public static API fetchAPIInfo(String artifactId, String groupId) {
-		if (lastResult != null) {
+		if (lastResult != null && lastResult.gradle.contains(artifactId) && lastResult.gradle.contains(groupId)) {
 			return lastResult;
 		}
 		try {
@@ -126,7 +126,7 @@ public class UpdateChecker {
 	 * @return API object containing all available metadata on requested API
 	 */
 	public static API fetchAPIInfo(String uuid) {
-		if (lastResult != null)
+		if (lastResult != null && lastResult.id.equals(uuid))
 			return lastResult;
 		try{
 			URL url = new URL(apiURL + "/api/list?id=" + uuid);
@@ -196,9 +196,9 @@ public class UpdateChecker {
 	}
 
 	/**
-	 * Clear the cached API object. You should never have to call this unless you're somehow getting bad cached data.
+	 * Clear the cached API object; implemented for testing purposes only, don't actually use this!
 	 */
-	public static void clearCache() {
+	static void clearCache() {
 		UpdateChecker.lastResult = null;
 	}
 }
