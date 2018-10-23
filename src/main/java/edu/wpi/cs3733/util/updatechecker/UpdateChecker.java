@@ -1,5 +1,14 @@
 package edu.wpi.cs3733.util.updatechecker;
 
+import javax.net.ssl.HttpsURLConnection;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+
 public class UpdateChecker {
 
 
@@ -7,6 +16,7 @@ public class UpdateChecker {
 	 * Default API base url. Can override if desired.
 	 */
 	protected static String apiURL = "https://ravana.dyn.wpi.edu";
+	protected static URL url = null;
 
 	/**
 	 * Cached response from latest query to API server
@@ -18,7 +28,26 @@ public class UpdateChecker {
 	 * @return True if server is up, false otherwise
 	 */
 	public static boolean checkConnection() {
-		return false;
+		if (url == null){
+			try{
+				url = new URL(apiURL);
+			} catch (MalformedURLException e){
+				return false;
+			}
+		}
+
+		try{
+			//Create a connection object and use it to connect to the server. If no IOException is generated we can
+			//assume the connection works, so just disconnect and return true. If ANY exception is generated, return
+			//false.
+			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+			connection.connect();
+			connection.disconnect();
+			return true;
+		} catch (IOException e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	/**
@@ -107,13 +136,37 @@ public class UpdateChecker {
 	 * Set API base URL
 	 * @param apiURL API url as a string. This should be the BASE URL, i.e. https://ravana.dyn.wpi.edu, NOT INCLUDING
 	 *               ANY TRAILING CHARACTERS. That means you shouldn't put /api here!
+	 * @throws MalformedURLException Thrown in case of bad URL.
 	 */
-	public static void setApiURL(String apiURL){
+	public static void setApiURL(String apiURL) throws MalformedURLException {
+		url = new URL(apiURL);
 		UpdateChecker.apiURL = apiURL;
 	}
 
 	/**
-	 * Clear the cached API object. Don't actually do this!
+	 * Utility function for comparing version number strings.
+	 * @param orig First version string
+	 * @param next Next version string
+	 * @return -1 if first < next, 0 if first = next, 1 if first > next
+	 */
+	static int compareVersion(String orig, String next) {
+		//Split strings into numbers, parse the numbers, and turn them into appropriate lists
+		List<Integer> orig_nums = Arrays.stream(orig.split("\\.")).map(Integer::parseInt).collect(toList());
+		List<Integer> next_nums = Arrays.stream(next.split("\\.")).map(Integer::parseInt).collect(toList());
+
+		//Loop through the numbers. If the two are equal, proceed to the next most significant. If the two are not equal,
+		//return the result of their comparison.
+		for (int i = 0 ; i < 3; i++) {
+			final int comp = orig_nums.get(i).compareTo(next_nums.get(i));
+			if (comp == 0)
+				continue;
+			return comp;
+		}
+		return 0;
+	}
+
+	/**
+	 * Clear the cached API object. Don't actually do this, it's for testing purposes!
 	 */
 	static void clearCache() {
 		UpdateChecker.lastResult = null;
