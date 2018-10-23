@@ -54,8 +54,12 @@ public class UpdateChecker {
 	 *                edu.wpi.cs3733.[]#.team[]
 	 * @return True if up-to-date, false otherwise. Returns true as a fallback if the server can't be contacted.
 	 */
-	public static boolean isLatestVerison(String version, String artifactId, String groupId) {
-		return true;
+	public static boolean isLatestVersion(String version, String artifactId, String groupId) {
+		API api = fetchAPIInfo(artifactId, groupId);
+		if (api == null)
+			return true;
+
+		return compareVersion(version, api.version) != -1;
 	}
 
 	/**
@@ -63,10 +67,14 @@ public class UpdateChecker {
 	 * @param version API version in #.#.# format (e.g. 8.4.72)
 	 * @param uuid API UUID. To find your API's UUID, go to the API server /list.json
 	 *                (default: https://ravana.dyn.wpi/list.json) and check your API entry's "id" field.
-	 * @return True if up-to-date, false otherwise
+	 * @return True if up-to-date, false otherwise. Returns true as a fallback if the server can't be contacted.
 	 */
 	public static boolean isLatestVersion(String version, String uuid) {
-		return true;
+		API api = fetchAPIInfo(uuid);
+		if (api == null)
+			return true;
+
+		return compareVersion(version, api.version) != -1;
 	}
 
 	/**
@@ -177,12 +185,16 @@ public class UpdateChecker {
 	 * Utility function for comparing version number strings.
 	 * @param orig First version string
 	 * @param next Next version string
-	 * @return -1 if first < next, 0 if first = next, 1 if first > next
+	 * @return -1 if first < next, 0 if first = next (or error), 1 if first > next.
 	 */
 	static int compareVersion(String orig, String next) {
 		//Split strings into numbers, parse the numbers, and turn them into appropriate lists
 		List<Integer> orig_nums = Arrays.stream(orig.split("\\.")).map(Integer::parseInt).collect(toList());
 		List<Integer> next_nums = Arrays.stream(next.split("\\.")).map(Integer::parseInt).collect(toList());
+
+		//Error checking in case of bad version numbers passed in
+		if (orig_nums.size() != 3 || next_nums.size() != 3)
+			return 0;
 
 		//Loop through the numbers. If the two are equal, proceed to the next most significant. If the two are not equal,
 		//return the result of their comparison.

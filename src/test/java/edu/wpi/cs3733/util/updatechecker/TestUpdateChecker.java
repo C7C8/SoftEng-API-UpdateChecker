@@ -30,7 +30,22 @@ class TestUpdateChecker {
 
 	@Test
 	void updateCheck() {
-		fail();
+		//Check to make sure we're up to date
+		assertTrue(UpdateChecker.isLatestVersion(testVersion, testArtifactId, testGroupId), "Couldn't validate latest version");
+		assertTrue(UpdateChecker.isLatestVersion(testVersion, testId), "Couldn't validate latest version");
+
+		//Now simulate a lower version number
+		assertFalse(UpdateChecker.isLatestVersion("1.0.0", testArtifactId, testGroupId), "Couldn't validate lower version");
+		assertFalse(UpdateChecker.isLatestVersion("1.0.0", testId), "Couldn't validate lower version");
+
+		//Make sure that, even if this version is somehow higher than
+		//the registered version, we still call this the latest version
+		assertTrue(UpdateChecker.isLatestVersion("2.0.0", testArtifactId, testGroupId), "Future version not validated");
+		assertTrue(UpdateChecker.isLatestVersion("2.0.0", testId), "Future version not validated");
+
+		//APIs that couldn't be found should still return true
+		assertTrue(UpdateChecker.isLatestVersion("17.0.1", "NotAnArtifact", "bad.group.id"), "Bad return for invalid API");
+		assertTrue(UpdateChecker.isLatestVersion("17.0.1", "NotAnId"), "Bad return for invalid API");
 	}
 
 	@Test
