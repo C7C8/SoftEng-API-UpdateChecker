@@ -67,6 +67,27 @@ class TestUpdateChecker {
 
 	@Test
 	void caching() {
-		fail();
+		//Make sure that we can request two different APIs and get the right data out; the caching system should help
+		//speed things up, but it needs to return correct data.
+		UpdateChecker.clearCache();
+		API res = UpdateChecker.fetchAPIInfo(testId);
+		assertNotNull(res);
+		assertEquals(testId, res.id);
+
+		//Repeat the same series without clearing the cache to make sure the data retrieved before is the same. This
+		//time the request should go through to the cached object.
+		res = UpdateChecker.fetchAPIInfo(testId);
+		assertNotNull(res);
+		assertEquals(testId, res.id);
+
+		//Get a different object without clearing the cache and make sure the data returned is different
+		res = UpdateChecker.fetchAPIInfo("9cabb706-37bc-40a0-a024-5936a4573a6b");
+		assertNotNull(res);
+		assertEquals("9cabb706-37bc-40a0-a024-5936a4573a6b", res.id);
+
+		//Go back to the original testing ID and make sure that data can still be retrieved
+		res = UpdateChecker.fetchAPIInfo(testId);
+		assertNotNull(res);
+		assertEquals(testId, res.id);
 	}
 }
