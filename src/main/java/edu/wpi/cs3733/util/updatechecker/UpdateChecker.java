@@ -18,7 +18,7 @@ public class UpdateChecker {
 	/**
 	 * Default API base url. Can override if desired.
 	 */
-	protected static String apiURL = "https://ravana.dyn.wpi.edu";
+	protected static String apiURL = "https://api.apisite.crmyers.dev";
 
 	/**
 	 * Cached response from latest query to API server
@@ -47,26 +47,9 @@ public class UpdateChecker {
 
 	/**
 	 * Get a boolean indicating whether the provided version is up-to-date with the API server's latest version.
-	 * @param version API version in #.#.# format (e.g. 17.0.1)
-	 * @param artifactId API artifact ID, you can find this on the API site webpage -- it's just the 'name' field in the
-	 *                   gradle string.
-	 * @param groupId Group ID, also found on the API site webpage (the 'group' field). Looks like
-	 *                edu.wpi.cs3733.[]#.team[]
-	 * @return True if up-to-date, false otherwise. Returns true as a fallback if the server can't be contacted.
-	 */
-	public static boolean isLatestVersion(String version, String artifactId, String groupId) {
-		API api = fetchAPIInfo(artifactId, groupId);
-		if (api == null)
-			return true;
-
-		return compareVersion(version, api.version) != -1;
-	}
-
-	/**
-	 * Get a boolean indicating whether the provided version is up-to-date with the API server's latest version.
 	 * @param version API version in #.#.# format (e.g. 8.4.72)
 	 * @param uuid API UUID. To find your API's UUID, go to the API server /list.json
-	 *                (default: https://ravana.dyn.wpi/list.json) and check your API entry's "id" field.
+	 *                (default: https://apisite.crmyers.dev/list.json) and check your API entry's "id" field.
 	 * @return True if up-to-date, false otherwise. Returns true as a fallback if the server can't be contacted.
 	 */
 	public static boolean isLatestVersion(String version, String uuid) {
@@ -81,25 +64,8 @@ public class UpdateChecker {
 	 * Get a list of version changes from the changelog since the specified version. E.g. if you provide version 1.0.0
 	 * and there's been a version 1.0.1 and version 1.1.0 since, you'll get the changelog for just those two releases.
 	 * @param version API version in #.#.# format (e.g. 17.0.1). If null, full version history will be returned.
-	 * @param artifactId API artifact ID, you can find this on the API site webpage -- it's just the 'name' field in the
-	 *                   gradle string.
-	 * @param groupId Group ID, also found on the API site webpage (the 'group' field). Looks like
-	 *                edu.wpi.cs3733.[]#.team[]
-	 * @return Sorted array of version history entries as strings, most recent change last.
-	 */
-	public static String[] getChangesSince(String version, String artifactId, String groupId) {
-		API api = fetchAPIInfo(artifactId, groupId);
-		if (api == null)
-			return null;
-		return filterHistory(version, api.history);
-	}
-
-	/**
-	 * Get a list of version changes from the changelog since the specified version. E.g. if you provide version 1.0.0
-	 * and there's been a version 1.0.1 and version 1.1.0 since, you'll get the changelog for just those two releases.
-	 * @param version API version in #.#.# format (e.g. 17.0.1). If null, full version history will be returned.
 	 * @param uuid API UUID. To find your API's UUID, go to the API server /list.json
-	 *                (default: https://ravana.dyn.wpi/list.json) and check your API entry's "id" field.
+	 *                (default: https://apisite.crmyers.dev/list.json) and check your API entry's "id" field.
 	 * @return Sorted array of version history entries as strings, most recent change last.
 	 */
 	public static String[] getChangesSince(String version, String uuid) {
@@ -124,31 +90,8 @@ public class UpdateChecker {
 
 	/**
 	 * Fetch API info from the server. Useful for retrieving metadata if you need it!
-	 * @param artifactId API artifact ID, you can find this on the API site webpage -- it's just the 'name' field in the
-	 *                   gradle string.
-	 * @param groupId Group ID, also found on the API site webpage (the 'group' field). Looks like
-	 *                edu.wpi.cs3733.[]#.team[]
-	 * @implNote Returns cached version of API info object if data has already been retrieved.
-	 * @return API object containing all available metadata on requested API
-	 */
-	public static API fetchAPIInfo(String artifactId, String groupId) {
-		if (lastResult != null && lastResult.gradle.contains(artifactId) && lastResult.gradle.contains(groupId)) {
-			return lastResult;
-		}
-		try {
-			URL url = new URL(apiURL + "/api/list?artifactID=" + artifactId + "&groupID=" + groupId);
-			lastResult = fetchByURL(url);
-			return lastResult;
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	/**
-	 * Fetch API info from the server. Useful for retrieving metadata if you need it!
 	 * @param uuid API UUID. To find your API's UUID, go to the API server /list.json
-	 *                (default: https://ravana.dyn.wpi/list.json) and check your API entry's "id" field.
+	 *                (default: https://apisite.crmyers.dev/list.json) and check your API entry's "id" field.
 	 * @implNote Returns cached version of API info object if data has already been retrieved.
 	 * @return API object containing all available metadata on requested API
 	 */
@@ -156,7 +99,7 @@ public class UpdateChecker {
 		if (lastResult != null && lastResult.id.equals(uuid))
 			return lastResult;
 		try{
-			URL url = new URL(apiURL + "/api/list?id=" + uuid);
+			URL url = new URL(apiURL + "/list?id=" + uuid);
 			lastResult = fetchByURL(url);
 			return lastResult;
 		} catch (MalformedURLException e) {
@@ -170,7 +113,7 @@ public class UpdateChecker {
 	 * @param url HTTPS URL.
 	 * @return API object if found, null if otherwise or if error.
 	 */
-	protected static API fetchByURL(URL url) {
+	private static API fetchByURL(URL url) {
 		API api;
 		try {
 			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();

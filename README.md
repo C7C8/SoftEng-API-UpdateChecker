@@ -22,19 +22,17 @@ types.
 Everything is contained within package `edu.wpi.cs3733.util.updatechecker`.
 The main class is UpdateChecker, which is implemented as a class
 with only static methods and data, so you don't need to instantiate
-anything to use it. All functions listed below can accept API
-identifiers in two ways: UUID or artifact/group ID ("by Maven").
+anything to use it. All functions listed below accept API identifiers
+in the form of UUIDs, which you can get from the server's 
+[list.json](https://apisite.crmyers.dev/list.json) file.
 [The in-code documentation is also comprehensive](/src/main/java/edu/wpi/cs3733/util/updatechecker/UpdateChecker.java),
 so use it when you need more details.
 
-*For brevity the alternate modes of a function (by maven/UUID) are
-not shown; check your IDE's autocomplete or the javadocs for more.*
-
 | Function | Description |
 | -------- | ----------- |
-| `isLatestVersion(String version, ...)` | Returns true if the given version is greater than or equal to the server's stored version, false otherwise. Returns true in case of [silent] connection error to help prevent unwanted notifications. |
-| `getChangesSince(String version, ...)` | Returns an array (`String[]`) of changelog entries since the given version. E.g. if you're on version 1.0.0 and the server has 1.0.1 and 1.1.0, you'll get changelog entries for 1.0.1 and 1.1.0, but not 1.0.0 (since you're already on it). Useful if you want to inform users of what's changed to convince them to upgrade.
-| `fetchAPIInfo(...)` | Returns [an `API` object](/src/main/java/edu/wpi/cs3733/util/updatechecker/API.java) containing ***all*** metadata the server has on the given API. Useful if you want more info than presented by the other functions, or you'd prefer to do some processing on your own. |
+| `isLatestVersion(String version, String uuid| Returns true if the given version is greater than or equal to the server's stored version, false otherwise. Returns true in case of [silent] connection error to help prevent unwanted notifications. |
+| `getChangesSince(String version, String uuid| Returns an array (`String[]`) of changelog entries since the given version. E.g. if you're on version 1.0.0 and the server has 1.0.1 and 1.1.0, you'll get changelog entries for 1.0.1 and 1.1.0, but not 1.0.0 (since you're already on it). Useful if you want to inform users of what's changed to convince them to upgrade.
+| `fetchAPIInfo(String uuid)| Returns [an `API` object](/src/main/java/edu/wpi/cs3733/util/updatechecker/API.java) containing ***all*** metadata the server has on the given API. Useful if you want more info than presented by the other functions, or you'd prefer to do some processing on your own. |
 
 That's it! You can use these functions at any time, even if you
 don't have internet access, without worry for special error handling.
